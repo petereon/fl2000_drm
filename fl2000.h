@@ -89,7 +89,8 @@ static inline int fl2000_submit_urb(struct urb *urb)
 	return ret;
 }
 
-static inline int fl2000_urb_status(struct usb_device *usb_dev, int status, int pipe)
+static inline int fl2000_urb_status(struct usb_device *usb_dev, int status,
+				    int pipe)
 {
 	int ret = status;
 
@@ -133,18 +134,21 @@ struct fl2000_gem_object {
 
 /* Timeout in us for I2C read/write operations */
 #define I2C_RDWR_INTERVAL (200)
-#define I2C_RDWR_TIMEOUT  (256 * 1000)
+#define I2C_RDWR_TIMEOUT (256 * 1000)
 
-#define to_fl2000_gem_obj(gem_obj) container_of(gem_obj, struct fl2000_gem_object, base)
+#define to_fl2000_gem_obj(gem_obj) \
+	container_of(gem_obj, struct fl2000_gem_object, base)
 
 /* GEM buffers */
 int fl2000_gem_mmap(struct file *filp, struct vm_area_struct *vma);
-struct drm_gem_object *fl2000_gem_create_object_default_funcs(struct drm_device *dev, size_t size);
+struct drm_gem_object *
+fl2000_gem_create_object_default_funcs(struct drm_device *dev, size_t size);
 int fl2000_gem_dumb_create(struct drm_file *file_priv, struct drm_device *drm,
 			   struct drm_mode_create_dumb *args);
-struct drm_gem_object *fl2000_gem_prime_import_sg_table(struct drm_device *dev,
-							struct dma_buf_attachment *attach,
-							struct sg_table *sgt);
+struct drm_gem_object *
+fl2000_gem_prime_import_sg_table(struct drm_device *dev,
+				 struct dma_buf_attachment *attach,
+				 struct sg_table *sgt);
 void fl2000_gem_free(struct drm_gem_object *gem_obj);
 extern const struct vm_operations_struct fl2000_gem_vm_ops;
 struct sg_table *fl2000_gem_prime_get_sg_table(struct drm_gem_object *gem_obj);
@@ -153,19 +157,23 @@ void fl2000_gem_prime_vunmap(struct drm_gem_object *gem_obj, void *vaddr);
 
 /* Streaming transfer task */
 struct fl2000_stream;
-struct fl2000_stream *fl2000_stream_create(struct usb_device *usb_dev, struct drm_crtc *crtc);
+struct fl2000_stream *fl2000_stream_create(struct usb_device *usb_dev,
+					   struct drm_crtc *crtc);
 void fl2000_stream_destroy(struct usb_device *usb_dev);
 
 /* Streaming interface */
-int fl2000_stream_mode_set(struct fl2000_stream *stream, int pixels, u32 bytes_pix);
-void fl2000_stream_compress(struct fl2000_stream *stream, void *src, unsigned int height,
-			    unsigned int width, unsigned int pitch);
+int fl2000_stream_mode_set(struct fl2000_stream *stream, int pixels,
+			   u32 bytes_pix);
+void fl2000_stream_compress(struct fl2000_stream *stream, void *src,
+			    unsigned int height, unsigned int width,
+			    unsigned int pitch);
 int fl2000_stream_enable(struct fl2000_stream *stream);
 void fl2000_stream_disable(struct fl2000_stream *stream);
 
 /* Interrupt polling task */
 struct fl2000_intr;
-struct fl2000_intr *fl2000_intr_create(struct usb_device *usb_dev, struct drm_device *drm);
+struct fl2000_intr *fl2000_intr_create(struct usb_device *usb_dev,
+				       struct drm_device *drm);
 void fl2000_intr_destroy(struct usb_device *usb_dev);
 
 /* I2C adapter interface creation */
@@ -180,11 +188,13 @@ int fl2000_usb_magic(struct usb_device *usb_dev);
 int fl2000_afe_magic(struct usb_device *usb_dev);
 int fl2000_set_transfers(struct usb_device *usb_dev);
 int fl2000_set_pixfmt(struct usb_device *usb_dev, u32 bytes_pix);
-int fl2000_set_timings(struct usb_device *usb_dev, struct fl2000_timings *timings);
+int fl2000_set_timings(struct usb_device *usb_dev,
+		       struct fl2000_timings *timings);
 int fl2000_set_pll(struct usb_device *usb_dev, struct fl2000_pll *pll);
 int fl2000_enable_interrupts(struct usb_device *usb_dev);
 int fl2000_check_interrupt(struct usb_device *usb_dev);
-int fl2000_i2c_dword(struct usb_device *usb_dev, bool read, u16 addr, u8 offset, u32 *data);
+int fl2000_i2c_dword(struct usb_device *usb_dev, bool read, u16 addr, u8 offset,
+		     u32 *data);
 
 /* DRM device creation */
 int fl2000_drm_bind(struct device *master);

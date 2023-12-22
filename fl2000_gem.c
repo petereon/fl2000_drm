@@ -24,7 +24,8 @@ static void fl2000_gem_free_object(struct drm_gem_object *gem_obj)
 	kfree(obj);
 }
 
-static struct fl2000_gem_object *fl2000_gem_create_object(struct drm_device *drm, size_t size)
+static struct fl2000_gem_object *
+fl2000_gem_create_object(struct drm_device *drm, size_t size)
 {
 	struct fl2000_gem_object *obj;
 	struct drm_gem_object *gem_obj;
@@ -72,7 +73,8 @@ void fl2000_gem_free(struct drm_gem_object *gem_obj)
 	fl2000_gem_free_object(gem_obj);
 }
 
-static struct fl2000_gem_object *fl2000_gem_create(struct drm_device *drm, size_t size)
+static struct fl2000_gem_object *fl2000_gem_create(struct drm_device *drm,
+						   size_t size)
 {
 	struct fl2000_gem_object *obj;
 	int ret;
@@ -104,9 +106,10 @@ error:
 	return ERR_PTR(ret);
 }
 
-static struct fl2000_gem_object *fl2000_gem_create_with_handle(struct drm_file *file_priv,
-							       struct drm_device *drm, size_t size,
-							       uint32_t *handle)
+static struct fl2000_gem_object *
+fl2000_gem_create_with_handle(struct drm_file *file_priv,
+			      struct drm_device *drm, size_t size,
+			      uint32_t *handle)
 {
 	struct fl2000_gem_object *obj;
 	struct drm_gem_object *gem_obj;
@@ -125,7 +128,7 @@ static struct fl2000_gem_object *fl2000_gem_create_with_handle(struct drm_file *
 	ret = drm_gem_handle_create(file_priv, gem_obj, handle);
 
 	/* drop reference from allocate - handle holds it now. */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
 	drm_gem_object_put(gem_obj);
 #else
 	drm_gem_object_put_unlocked(gem_obj);
@@ -144,7 +147,8 @@ int fl2000_gem_dumb_create(struct drm_file *file_priv, struct drm_device *drm,
 	args->pitch = DIV_ROUND_UP(args->width * args->bpp, 8);
 	args->size = args->pitch * args->height;
 
-	obj = fl2000_gem_create_with_handle(file_priv, drm, args->size, &args->handle);
+	obj = fl2000_gem_create_with_handle(file_priv, drm, args->size,
+					    &args->handle);
 	return PTR_ERR_OR_ZERO(obj);
 }
 
@@ -153,7 +157,8 @@ const struct vm_operations_struct fl2000_gem_vm_ops = {
 	.close = drm_gem_vm_close,
 };
 
-static int fl2000_gem_mmap_obj(struct fl2000_gem_object *obj, struct vm_area_struct *vma)
+static int fl2000_gem_mmap_obj(struct fl2000_gem_object *obj,
+			       struct vm_area_struct *vma)
 {
 	int ret;
 
@@ -204,16 +209,17 @@ struct sg_table *fl2000_gem_prime_get_sg_table(struct drm_gem_object *gem_obj)
 	if (!obj->pages)
 		return ERR_PTR(-ENOMEM);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,10,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	return drm_prime_pages_to_sg(obj->base.dev, obj->pages, obj->num_pages);
 #else
 	return drm_prime_pages_to_sg(obj->pages, obj->num_pages);
 #endif
 }
 
-struct drm_gem_object *fl2000_gem_prime_import_sg_table(struct drm_device *drm,
-							struct dma_buf_attachment *attach,
-							struct sg_table *sgt)
+struct drm_gem_object *
+fl2000_gem_prime_import_sg_table(struct drm_device *drm,
+				 struct dma_buf_attachment *attach,
+				 struct sg_table *sgt)
 {
 	int ret;
 	struct fl2000_gem_object *obj;
@@ -225,13 +231,15 @@ struct drm_gem_object *fl2000_gem_prime_import_sg_table(struct drm_device *drm,
 
 	obj->sgt = sgt;
 	obj->num_pages = DIV_ROUND_UP(size, PAGE_SIZE);
-	obj->pages = kvmalloc_array(obj->num_pages, sizeof(struct page *), GFP_KERNEL);
+	obj->pages = kvmalloc_array(obj->num_pages, sizeof(struct page *),
+				    GFP_KERNEL);
 	if (!obj->pages) {
 		ret = -ENOMEM;
 		goto error;
 	}
 
-	ret = drm_prime_sg_to_page_addr_arrays(sgt, obj->pages, NULL, obj->num_pages);
+	ret = drm_prime_sg_to_page_addr_arrays(sgt, obj->pages, NULL,
+					       obj->num_pages);
 	if (ret < 0) {
 		kvfree(obj->pages);
 		goto error;
@@ -284,7 +292,8 @@ static const struct drm_gem_object_funcs fl2000_gem_default_funcs = {
  * Returns:
  * A pointer to a allocated GEM object or an error pointer on failure.
  */
-struct drm_gem_object *fl2000_gem_create_object_default_funcs(struct drm_device *drm, size_t size)
+struct drm_gem_object *
+fl2000_gem_create_object_default_funcs(struct drm_device *drm, size_t size)
 {
 	struct fl2000_gem_object *obj;
 

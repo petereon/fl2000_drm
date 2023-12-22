@@ -10,12 +10,12 @@
 #define DRM_DRIVER_DESC "USB-HDMI"
 #define DRM_DRIVER_DATE "20181001"
 
-#define DRM_DRIVER_MAJOR      0
-#define DRM_DRIVER_MINOR      0
+#define DRM_DRIVER_MAJOR 0
+#define DRM_DRIVER_MINOR 0
 #define DRM_DRIVER_PATCHLEVEL 1
 
 /* Maximum supported resolution, out-of-the-blue numbers */
-#define FL20000_MAX_WIDTH  4000
+#define FL20000_MAX_WIDTH 4000
 #define FL20000_MAX_HEIGHT 4000
 
 /* Force using 32-bit XRGB8888 on input for simplicity */
@@ -45,9 +45,12 @@ static const u32 fl2000_pixel_formats[] = {
 /* Assume bulk transfers can use only 80% of USB bandwidth */
 #define FL2000_BULK_BW_PERCENT 80
 
-#define FL2000_BULK_BW_HIGH_SPEED	(480000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
-#define FL2000_BULK_BW_SUPER_SPEED	(5000000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
-#define FL2000_BULK_BW_SUPER_SPEED_PLUS (10000000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
+#define FL2000_BULK_BW_HIGH_SPEED \
+	(480000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
+#define FL2000_BULK_BW_SUPER_SPEED \
+	(5000000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
+#define FL2000_BULK_BW_SUPER_SPEED_PLUS \
+	(10000000000ull * 100 / FL2000_BULK_BW_PERCENT / 8)
 
 static u32 fl2000_get_bytes_pix(enum usb_device_speed speed, u32 pixclock)
 {
@@ -161,23 +164,27 @@ static u64 fl2000_pll_ppm_err(u64 clock_mil, u32 vco_clk, u32 divisor)
 	return pll_clk_err / (clock_mil / FL2000_PLL_PRECISION);
 }
 
-static inline u32 fl2000_pll_get_divisor(u64 clock_mil, u32 vco_clk, u64 *min_ppm_err)
+static inline u32 fl2000_pll_get_divisor(u64 clock_mil, u32 vco_clk,
+					 u64 *min_ppm_err)
 {
 	static const u32 divisor_arr[] = {
-		2,   4,	  6,   7,   8,	 9,   10,  11,	12,  13,  14,  15,  16,	 17,  18,  19,
-		20,  21,  22,  23,  24,	 25,  26,  27,	28,  29,  30,  31,  32,	 33,  34,  35,
-		36,  37,  38,  39,  40,	 41,  42,  43,	44,  45,  46,  47,  48,	 49,  50,  51,
-		52,  53,  54,  55,  56,	 57,  58,  59,	60,  61,  62,  63,  64,	 65,  66,  67,
-		68,  69,  70,  71,  72,	 73,  74,  75,	76,  77,  78,  79,  80,	 81,  82,  83,
-		84,  85,  86,  87,  88,	 89,  90,  91,	92,  93,  94,  95,  96,	 97,  98,  99,
-		100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
-		116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128
+		2,   4,	  6,   7,   8,	 9,   10,  11,	12,  13,  14,  15,  16,
+		17,  18,  19,  20,  21,	 22,  23,  24,	25,  26,  27,  28,  29,
+		30,  31,  32,  33,  34,	 35,  36,  37,	38,  39,  40,  41,  42,
+		43,  44,  45,  46,  47,	 48,  49,  50,	51,  52,  53,  54,  55,
+		56,  57,  58,  59,  60,	 61,  62,  63,	64,  65,  66,  67,  68,
+		69,  70,  71,  72,  73,	 74,  75,  76,	77,  78,  79,  80,  81,
+		82,  83,  84,  85,  86,	 87,  88,  89,	90,  91,  92,  93,  94,
+		95,  96,  97,  98,  99,	 100, 101, 102, 103, 104, 105, 106, 107,
+		108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+		121, 122, 123, 124, 125, 126, 127, 128
 	};
 	unsigned int divisor_idx;
 	u32 best_divisor = 0;
 
 	/* Iterate over array */
-	for (divisor_idx = 0; divisor_idx < ARRAY_SIZE(divisor_arr); divisor_idx++) {
+	for (divisor_idx = 0; divisor_idx < ARRAY_SIZE(divisor_arr);
+	     divisor_idx++) {
 		u32 divisor = divisor_arr[divisor_idx];
 		u64 ppm_err = fl2000_pll_ppm_err(clock_mil, vco_clk, divisor);
 
@@ -191,7 +198,8 @@ static inline u32 fl2000_pll_get_divisor(u64 clock_mil, u32 vco_clk, u64 *min_pp
 }
 
 /* Try to match pixel clock - find parameters with minimal PLL error */
-static u64 fl2000_pll_calc(u64 clock_mil, struct fl2000_pll *pll, u32 *clock_calculated)
+static u64 fl2000_pll_calc(u64 clock_mil, struct fl2000_pll *pll,
+			   u32 *clock_calculated)
 {
 	static const u32 prescaler_max = 2;
 	static const u32 multiplier_max = 128;
@@ -200,15 +208,18 @@ static u64 fl2000_pll_calc(u64 clock_mil, struct fl2000_pll *pll, u32 *clock_cal
 	u64 min_ppm_err = (u64)(-1);
 
 	for (prescaler = 1; prescaler <= prescaler_max; prescaler++)
-		for (multiplier = 1; multiplier <= multiplier_max; multiplier++) {
+		for (multiplier = 1; multiplier <= multiplier_max;
+		     multiplier++) {
 			/* Do not need precision here yet, no 10^6 multiply */
 			u32 vco_clk = FL2000_XTAL / prescaler * multiplier;
 			u32 divisor;
 
-			if (vco_clk < FL2000_VCOCLOCK_MIN || vco_clk > FL2000_VCOCLOCK_MAX)
+			if (vco_clk < FL2000_VCOCLOCK_MIN ||
+			    vco_clk > FL2000_VCOCLOCK_MAX)
 				continue;
 
-			divisor = fl2000_pll_get_divisor(clock_mil, vco_clk, &min_ppm_err);
+			divisor = fl2000_pll_get_divisor(clock_mil, vco_clk,
+							 &min_ppm_err);
 			if (divisor == 0)
 				continue;
 
@@ -218,7 +229,7 @@ static u64 fl2000_pll_calc(u64 clock_mil, struct fl2000_pll *pll, u32 *clock_cal
 			pll->function = vco_clk < 125000000 ? 0 :
 					vco_clk < 250000000 ? 1 :
 					vco_clk < 500000000 ? 2 :
-								    3;
+							      3;
 			*clock_calculated = vco_clk / divisor;
 		}
 
@@ -227,7 +238,8 @@ static u64 fl2000_pll_calc(u64 clock_mil, struct fl2000_pll *pll, u32 *clock_cal
 }
 
 static int fl2000_mode_calc(const struct drm_display_mode *mode,
-			    struct drm_display_mode *adjusted_mode, struct fl2000_pll *pll)
+			    struct drm_display_mode *adjusted_mode,
+			    struct fl2000_pll *pll)
 {
 	u64 ppm_err;
 	u32 clock_calculated;
@@ -249,10 +261,12 @@ static int fl2000_mode_calc(const struct drm_display_mode *mode,
 		 * maximum htotal is 10000 pix (no way) we get 10^19 max value and using u64 which
 		 * is 1.8*10^19 no overflow can occur. Assume all this was checked before
 		 */
-		clock_mil_adjusted = clock_mil * (mode->htotal + d) / mode->htotal;
+		clock_mil_adjusted =
+			clock_mil * (mode->htotal + d) / mode->htotal;
 
 		/* To keep precision use clock multiplied by 10^6 */
-		ppm_err = fl2000_pll_calc(clock_mil_adjusted, pll, &clock_calculated);
+		ppm_err = fl2000_pll_calc(clock_mil_adjusted, pll,
+					  &clock_calculated);
 
 		/* Stop searching as soon as the first valid option found */
 		if (ppm_err < FL2000_PPM_ERR_MAX) {
@@ -270,14 +284,16 @@ static int fl2000_mode_calc(const struct drm_display_mode *mode,
 	return -1;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)
-static enum drm_mode_status fl2000_display_mode_valid(struct drm_simple_display_pipe *pipe,
-						      const struct drm_display_mode *mode)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 5, 0)
+static enum drm_mode_status
+fl2000_display_mode_valid(struct drm_simple_display_pipe *pipe,
+			  const struct drm_display_mode *mode)
 {
 	struct drm_device *drm = pipe->crtc.dev;
 #else
-static enum drm_mode_status fl2000_display_mode_valid(struct drm_crtc *crtc,
-						      const struct drm_display_mode *mode)
+static enum drm_mode_status
+fl2000_display_mode_valid(struct drm_crtc *crtc,
+			  const struct drm_display_mode *mode)
 {
 	struct drm_device *drm = crtc->dev;
 #endif
@@ -335,7 +351,9 @@ static int fl2000_display_check(struct drm_simple_display_pipe *pipe,
 	if (n > 1) {
 		struct drm_format_name_buf format_name;
 
-		dev_err(drm->dev, "Only single plane RGB fbs are supported, got %d planes (%s)", n,
+		dev_err(drm->dev,
+			"Only single plane RGB fbs are supported, got %d planes (%s)",
+			n,
 			drm_get_format_name(fb->format->format, &format_name));
 		return -EINVAL;
 	}
@@ -356,12 +374,14 @@ static void fb2000_dirty(struct drm_framebuffer *fb, struct drm_rect *rect)
 	}
 
 	if (import_attach) {
-		ret = dma_buf_begin_cpu_access(import_attach->dmabuf, DMA_FROM_DEVICE);
+		ret = dma_buf_begin_cpu_access(import_attach->dmabuf,
+					       DMA_FROM_DEVICE);
 		if (ret)
 			return;
 	}
 
-	fl2000_stream_compress(drm_if->stream, to_fl2000_gem_obj(gem_obj)->vaddr, fb->height,
+	fl2000_stream_compress(drm_if->stream,
+			       to_fl2000_gem_obj(gem_obj)->vaddr, fb->height,
 			       fb->width, fb->pitches[0]);
 
 	if (import_attach)
@@ -404,7 +424,8 @@ static const struct drm_simple_display_pipe_funcs fl2000_display_funcs = {
 	.prepare_fb = drm_gem_fb_simple_display_pipe_prepare_fb,
 };
 
-static void fl2000_output_mode_set(struct drm_encoder *encoder, struct drm_display_mode *mode,
+static void fl2000_output_mode_set(struct drm_encoder *encoder,
+				   struct drm_display_mode *mode,
 				   struct drm_display_mode *adjusted_mode)
 {
 	struct drm_device *drm = encoder->dev;
@@ -423,17 +444,21 @@ static void fl2000_output_mode_set(struct drm_encoder *encoder, struct drm_displ
 	if (!bytes_pix)
 		return;
 
-	dev_info(drm->dev, "Mode requested:  " DRM_MODE_FMT, DRM_MODE_ARG(mode));
-	dev_info(drm->dev, "Mode configured: " DRM_MODE_FMT, DRM_MODE_ARG(adjusted_mode));
+	dev_info(drm->dev, "Mode requested:  " DRM_MODE_FMT,
+		 DRM_MODE_ARG(mode));
+	dev_info(drm->dev, "Mode configured: " DRM_MODE_FMT,
+		 DRM_MODE_ARG(adjusted_mode));
 
 	/* Prepare timing configuration */
 	timings.hactive = adjusted_mode->hdisplay;
 	timings.htotal = adjusted_mode->htotal;
-	timings.hsync_width = adjusted_mode->hsync_end - adjusted_mode->hsync_start;
+	timings.hsync_width =
+		adjusted_mode->hsync_end - adjusted_mode->hsync_start;
 	timings.hstart = adjusted_mode->htotal - adjusted_mode->hsync_start + 1;
 	timings.vactive = adjusted_mode->vdisplay;
 	timings.vtotal = adjusted_mode->vtotal;
-	timings.vsync_width = adjusted_mode->vsync_end - adjusted_mode->vsync_start;
+	timings.vsync_width =
+		adjusted_mode->vsync_end - adjusted_mode->vsync_start;
 	timings.vstart = adjusted_mode->vtotal - adjusted_mode->vsync_start + 1;
 
 	/* Set PLL settings */
@@ -456,7 +481,8 @@ static void fl2000_output_mode_set(struct drm_encoder *encoder, struct drm_displ
 
 	fl2000_afe_magic(usb_dev);
 
-	fl2000_stream_mode_set(drm_if->stream, mode->hdisplay * mode->vdisplay, bytes_pix);
+	fl2000_stream_mode_set(drm_if->stream, mode->hdisplay * mode->vdisplay,
+			       bytes_pix);
 }
 
 /* FL2000 HW control functions: mode configuration, turn on/off */
@@ -499,14 +525,17 @@ int fl2000_drm_bind(struct device *master)
 
 	dev_info(master, "Binding FL2000 master");
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0)
-	drm_if = devm_drm_dev_alloc(master, &fl2000_drm_driver, struct fl2000_drm_if, drm);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
+	drm_if = devm_drm_dev_alloc(master, &fl2000_drm_driver,
+				    struct fl2000_drm_if, drm);
 	if (IS_ERR(drm_if)) {
-		dev_err(master, "Cannot allocate DRM structure (%ld)", PTR_ERR(drm_if));
+		dev_err(master, "Cannot allocate DRM structure (%ld)",
+			PTR_ERR(drm_if));
 		return PTR_ERR(drm_if);
 	}
 #else
-	drm_if = devres_alloc(&fl2000_drm_if_release, sizeof(*drm_if), GFP_KERNEL);
+	drm_if = devres_alloc(&fl2000_drm_if_release, sizeof(*drm_if),
+			      GFP_KERNEL);
 	if (!drm_if) {
 		dev_err(&usb_dev->dev, "Cannot allocate DRM private structure");
 		return -ENOMEM;
@@ -523,7 +552,7 @@ int fl2000_drm_bind(struct device *master)
 	drm_if->usb_dev = usb_dev;
 	drm->dev_private = drm_if;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
 	ret = drmm_mode_config_init(drm);
 	if (ret) {
 		dev_err(master, "Cannot initialize DRM mode (%d)", ret);
@@ -548,11 +577,12 @@ int fl2000_drm_bind(struct device *master)
 		return ret;
 	}
 
-	ret = drm_simple_display_pipe_init(drm, &drm_if->pipe, &fl2000_display_funcs,
-					   fl2000_pixel_formats, ARRAY_SIZE(fl2000_pixel_formats),
-					   NULL, NULL);
+	ret = drm_simple_display_pipe_init(
+		drm, &drm_if->pipe, &fl2000_display_funcs, fl2000_pixel_formats,
+		ARRAY_SIZE(fl2000_pixel_formats), NULL, NULL);
 	if (ret) {
-		dev_err(drm->dev, "Cannot configure simple display pipe (%d)", ret);
+		dev_err(drm->dev, "Cannot configure simple display pipe (%d)",
+			ret);
 		return ret;
 	}
 
